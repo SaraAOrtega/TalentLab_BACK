@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Proyecto from "../models/proyectos.models";
 import { Op } from 'sequelize';
+import Personaje from "../models/personajes.models";
 
 // Interfaz para extender Request con el userId
 interface AuthRequest extends Request {
@@ -51,7 +52,7 @@ export const getProyecto = async (req: AuthRequest, res: Response) => {
                     { user_id: userId }
                 ]
             },
-            attributes: ['id_proyecto', 'user_id', 'nombre_proyecto', 'descripcion']
+            attributes: ['id_proyecto', 'user_id', 'nombre_proyecto', 'director_proyecto', 'fecha_pdv', 'fecha_rodaje', 'lugar','descripcion']
         });
 
         console.log('Resultado de la búsqueda:', proyecto);
@@ -80,14 +81,14 @@ export const getProyecto = async (req: AuthRequest, res: Response) => {
 
 export const deleteProyecto = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
+    console.log(`Iniciando deleteProyecto. ID del proyecto: ${id}, ID del usuario: ${req.userId}`);
+
     try {
-        // Verificar que id sea un número válido
         const proyectoId = parseInt(id);
         if (isNaN(proyectoId)) {
             return res.status(400).json({ msg: 'ID de proyecto inválido' });
         }
 
-        // Verificar que req.userId exista
         if (!req.userId) {
             return res.status(401).json({ msg: 'Usuario no autenticado' });
         }
@@ -102,30 +103,31 @@ export const deleteProyecto = async (req: AuthRequest, res: Response) => {
             });
         }
 
+        // Eliminar todos los personajes asociados al proyecto
+        await Personaje.destroy({
+            where: { proyecto_id: proyectoId }
+        });
+
+        // Eliminar el proyecto
         await proyecto.destroy();
 
+        console.log('Proyecto y personajes eliminados con éxito');
         res.json({
-            msg: 'Proyecto eliminado con éxito'
+            msg: 'Proyecto y personajes eliminados con éxito'
         });
     } catch (error) {
         console.error('Error al eliminar proyecto:', error);
-        
-        // Manejo más detallado del error
-        if (error instanceof Error) {
-            res.status(500).json({ 
-                msg: 'Error al eliminar el proyecto', 
-                error: error.message 
-            });
-        } else {
-            res.status(500).json({ 
-                msg: 'Error desconocido al eliminar el proyecto' 
-            });
-        }
+
+        res.status(500).json({ 
+            msg: 'Error al eliminar el proyecto', 
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
     }
 }
 
+
 export const createProyecto = async (req: AuthRequest, res: Response) => {
-    const { nombre_proyecto, director_proyecto, descripcion, fecha_pdv, fecha_rodaje } = req.body;
+    const { nombre_proyecto, director_proyecto, descripcion, lugar, fecha_pdv, fecha_rodaje } = req.body;
     
     try {
         // Verificar que req.userId exista
@@ -156,6 +158,7 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
         const nuevoProyecto = await Proyecto.create({
             nombre_proyecto,
             director_proyecto,
+            lugar, 
             descripcion,
             fecha_pdv: fechaPdv,
             fecha_rodaje: fechaRodaje,
@@ -168,6 +171,7 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
                 proyecto_id: nuevoProyecto.get('id_proyecto'),
                 nombre_proyecto: nuevoProyecto.get ('nombre_proyecto'),
                 director_proyecto: nuevoProyecto.get ('director_proyecto'),
+                lugar: nuevoProyecto.get ('lugar'),
                 descripcion: nuevoProyecto.get ('descripcion'),
                 fecha_pdv: nuevoProyecto.get ('fecha_pdv'),
                 fecha_rodaje: nuevoProyecto.get('fecha_rodaje'),
@@ -209,7 +213,7 @@ export const updateProyecto = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
 
     try {
-        const proyecto = await Proyecto.findOne({ where: { id, user_id: req.userId } });
+        const proyecto = await Proyecto.findOne({ where: { id_proyecto: id, user_id: req.userId } });
         if (proyecto) {
             await proyecto.update(body);
             res.json({

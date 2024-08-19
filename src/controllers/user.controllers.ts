@@ -5,7 +5,6 @@ import User from "../models/user.models";
 import { UserModel, UserCreationAttributes } from '../interfaces/user.interface';
 import { SECRET_KEY } from '../../config'; 
 
-// Función auxiliar para verificar SECRET_KEY
 function getSecretKey(): string {
     if (!SECRET_KEY) {
         throw new Error('SECRET_KEY no está definida');
@@ -37,15 +36,32 @@ export const newUser = async (req: Request, res: Response) => {
 
         const user = await User.create(newUserData);
 
+        console.log('Usuario creado:', user.toJSON());
+
         const token = jwt.sign(
-            { userId: user.get('id_user'), username: user.get('username') },
+            { 
+                userId: user.get('id_user'),
+                username: user.get('username'),
+                proyectoId: user.get('id_proyecto')
+            },
             getSecretKey(),
             { expiresIn: '1h' }
         );
 
+        console.log('Token generado para nuevo usuario:', token);
+        console.log('Datos del nuevo usuario:', { 
+            userId: user.get('id_user'), 
+            proyectoId: user.get('id_proyecto')
+        });
+
+        // Decodificar el token para verificar su contenido
+        const decodedToken = jwt.decode(token);
+        console.log('Contenido del token decodificado (nuevo usuario):', decodedToken);
+
         res.status(201).json({
             msg: `Usuario ${username} creado con éxito`,
-            token
+            token,
+            
         });
     } catch (error) {
         console.error('Error al crear usuario:', error);
@@ -76,16 +92,33 @@ export const loginUser = async (req: Request, res: Response) => {
             });
         }
 
+        console.log('Usuario autenticado:', user.toJSON());
+
         const token = jwt.sign(
-            { userId: user.id_user, username: user.username },
+            { 
+                userId: user.id_user, 
+                username: user.username, 
+                proyectoId: user.proyecto_id, // Asumiendo que existe este campo
+            },
             getSecretKey(),
             { expiresIn: '1h' }
         );
 
+        console.log('Token generado en login:', token);
+        console.log('Datos del usuario en login:', { 
+            userId: user.id_user, 
+            proyectoId: user.proyecto_id,
+        });
+
+        // Decodificar el token para verificar su contenido
+        const decodedToken = jwt.decode(token);
+        console.log('Contenido del token decodificado (login):', decodedToken);
+
         return res.json({ 
             token,
             username: user.username,
-            userId: user.id_user
+            userId: user.id_user,
+            proyectoId: user.proyecto_id,
         });
         
     } catch (error) {

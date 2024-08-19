@@ -4,6 +4,7 @@ import { SECRET_KEY } from '../../config'; // Asegúrate de que la ruta sea corr
 
 interface AuthRequest extends Request {
     userId?: number;
+     proyectoId?: number;
 }
 
 // Función auxiliar para verificar SECRET_KEY
@@ -26,15 +27,8 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
     const token = headerToken.slice(7);
 
     try {
-        const decoded = jwt.verify(token, getSecretKey()) as { id?: number, userId?: number };
-
-        if (decoded.id) {
-            req.userId = decoded.id;
-        } else if (decoded.userId) {
-            req.userId = decoded.userId;
-        } else {
-            throw new Error('Token no contiene id de usuario');
-        }
+        const decoded = jwt.verify(token, getSecretKey()) as { userId: number };
+        req.userId = decoded.userId;
 
         next();
     } catch (error) {

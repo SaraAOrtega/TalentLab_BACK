@@ -32,6 +32,10 @@ const Proyecto = db.define('Proyecto', {
     fecha_rodaje: {
         type: DataTypes.DATE
     },
+
+    lugar: {
+        type: DataTypes.TEXT
+    },
     
     descripcion: {
         type: DataTypes.TEXT
@@ -40,3 +44,6 @@ const Proyecto = db.define('Proyecto', {
 );
 
 export default Proyecto;
+
+
+

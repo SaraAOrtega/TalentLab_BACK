@@ -7,6 +7,7 @@ export interface UserAttributes {
   password: string;
   documento: string;
   rol: string;
+  proyecto_id? : number
 }
 
 export interface UserCreationAttributes extends Optional<UserAttributes, 'id_user'> {}

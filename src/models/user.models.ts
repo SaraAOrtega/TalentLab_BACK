@@ -30,7 +30,8 @@ const User = sequelize.define<Model<UserAttributes, UserCreationAttributes>>('Us
   rol: {
     type: DataTypes.STRING,
     allowNull: true
-  }
+  },
+  
 });
 
 export default User;

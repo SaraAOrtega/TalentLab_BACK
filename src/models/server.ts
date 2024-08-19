@@ -6,6 +6,7 @@ import routesProyectos from '../routes/proyecto.routes';
 import { Actor } from './actores.models';
 import User from './user.models';
 import Proyecto from './proyectos.models';
+import Personaje from './personajes.models';
 
 export class Server {
     private app: Application;
@@ -30,6 +31,7 @@ export class Server {
         this.app.use('/api/actores', routesActor);
         this.app.use('/api/users', routesUser);
         this.app.use('/api/proyectos', routesProyectos);
+      
     }
 
     midlewares() {
@@ -48,6 +50,7 @@ export class Server {
             await Actor.sync();
             await User.sync();
             await Proyecto.sync();
+            await Personaje.sync();
         } catch (error) {
             console.error('Unable to connect to the database:', error);
         }
