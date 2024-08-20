@@ -1,36 +1,47 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import db from '../db/connection';
 
-const Personaje = db.define('Personaje', {
-    id_personaje: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    proyecto_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'Proyectos', // Asegúrate de que este sea el nombre correcto de tu modelo de Usuario
-            key: 'id_proyecto'
-        }
-    },
-    rol: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
-    },
+class Personaje extends Model {
+  public id_personaje!: number;
+  public proyecto_id!: number;
+  public rol!: string;
+  public descripcion!: string;
 
-    
-    descripcion: {
-        type: DataTypes.TEXT
+  static associate(models: any) {
+    Personaje.belongsTo(models.Proyecto, {
+        foreignKey: 'proyecto_id',
+        as: 'proyecto'
+    });
+    // Añade aquí otras asociaciones si son necesarias
+}
+}
+
+Personaje.init({
+  id_personaje: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  proyecto_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Proyectos',
+      key: 'id_proyecto'
     }
+  },
+  rol: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  descripcion: {
+    type: DataTypes.TEXT
+  }
 }, {
-    timestamps: false,  // Desactiva los campos createdAt y updatedAt
-    tableName: 'Personajes'
+  sequelize: db,
+  modelName: 'Personaje',
+  tableName: 'Personajes',
+  timestamps: false // Desactiva los campos createdAt y updatedAt
 });
-
 
 export default Personaje;

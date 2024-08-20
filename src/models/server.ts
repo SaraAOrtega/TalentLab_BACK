@@ -15,10 +15,10 @@ export class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT || '3001';
-        this.listen();
         this.midlewares();
         this.routes();
         this.dbConnect();
+        this.listen();
     }
 
     listen() {
@@ -31,7 +31,6 @@ export class Server {
         this.app.use('/api/actores', routesActor);
         this.app.use('/api/users', routesUser);
         this.app.use('/api/proyectos', routesProyectos);
-      
     }
 
     midlewares() {
@@ -39,9 +38,9 @@ export class Server {
 
         // Configuración de CORS
         this.app.use(cors({
-            origin: 'http://localhost:4200', // Permitir solicitudes desde esta URL
+            origin: 'http://localhost:4200',
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
-            allowedHeaders: ['Content-Type', 'Authorization'] // Permitir estos encabezados
+            allowedHeaders: ['Content-Type', 'Authorization']
         }));
     }
 
@@ -51,9 +50,23 @@ export class Server {
             await User.sync();
             await Proyecto.sync();
             await Personaje.sync();
+            
+            // Inicializar asociaciones después de sincronizar los modelos
+            this.initializeAssociations();
+            
+            console.log('Database synchronized and associations initialized.');
         } catch (error) {
             console.error('Unable to connect to the database:', error);
         }
+    }
+
+    private initializeAssociations() {
+        const models = { Actor, User, Proyecto, Personaje };
+        Object.values(models).forEach((model: any) => {
+            if (typeof model.associate === 'function') {
+                model.associate(models);
+            }
+        });
     }
 }
 

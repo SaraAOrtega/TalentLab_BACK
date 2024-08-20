@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
+import { Transaction } from 'sequelize';
 import Proyecto from "../models/proyectos.models";
 import { Op } from 'sequelize';
 import Personaje from "../models/personajes.models";
+import db from '../db/connection';
 
 // Interfaz para extender Request con el userId
 interface AuthRequest extends Request {
@@ -52,7 +54,11 @@ export const getProyecto = async (req: AuthRequest, res: Response) => {
                     { user_id: userId }
                 ]
             },
-            attributes: ['id_proyecto', 'user_id', 'nombre_proyecto', 'director_proyecto', 'fecha_pdv', 'fecha_rodaje', 'lugar','descripcion']
+            attributes: ['id_proyecto', 'user_id', 'nombre_proyecto', 'director_proyecto', 'fecha_pdv', 'fecha_rodaje', 'lugar', 'descripcion'],
+            include: [{
+                model: Personaje,
+                as: 'personajes' // Esto debe coincidir con la asociación en el modelo
+            }]
         });
 
         console.log('Resultado de la búsqueda:', proyecto);
@@ -127,30 +133,36 @@ export const deleteProyecto = async (req: AuthRequest, res: Response) => {
 
 
 export const createProyecto = async (req: AuthRequest, res: Response) => {
-    const { nombre_proyecto, director_proyecto, descripcion, lugar, fecha_pdv, fecha_rodaje } = req.body;
-    
+    const t: Transaction = await db.transaction();
+
     try {
+        const { nombre_proyecto, director_proyecto, descripcion, lugar, fecha_pdv, fecha_rodaje, personajes } = req.body;
+
         // Verificar que req.userId exista
         if (!req.userId) {
+            await t.rollback();
             return res.status(401).json({ msg: 'Usuario no autenticado' });
         }
 
-        // Validar los datos de entrada
+        // Validaciones
         if (!nombre_proyecto || nombre_proyecto.trim() === '') {
+            await t.rollback();
             return res.status(400).json({ msg: 'El nombre del proyecto es requerido' });
         }
         if (!director_proyecto || director_proyecto.trim() === '') {
+            await t.rollback();
             return res.status(400).json({ msg: 'El director del proyecto es requerido' });
         }
 
-        // Validar fechas (opcional, dependiendo de tus requerimientos)
         const fechaPdv = fecha_pdv ? new Date(fecha_pdv) : null;
         const fechaRodaje = fecha_rodaje ? new Date(fecha_rodaje) : null;
 
         if (fechaPdv && isNaN(fechaPdv.getTime())) {
+            await t.rollback();
             return res.status(400).json({ msg: 'La fecha de PDV no es válida' });
         }
         if (fechaRodaje && isNaN(fechaRodaje.getTime())) {
+            await t.rollback();
             return res.status(400).json({ msg: 'La fecha de rodaje no es válida' });
         }
 
@@ -158,31 +170,41 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
         const nuevoProyecto = await Proyecto.create({
             nombre_proyecto,
             director_proyecto,
-            lugar, 
+            lugar,
             descripcion,
             fecha_pdv: fechaPdv,
             fecha_rodaje: fechaRodaje,
             user_id: req.userId
-        });
+        }, { transaction: t });
+
+        // Crear personajes si existen
+        if (personajes && Array.isArray(personajes)) {
+            await Promise.all(personajes.map(personaje => 
+                Personaje.create({ ...personaje, proyecto_id: nuevoProyecto.get('id_proyecto') }, { transaction: t })
+            ));
+        }
+
+        await t.commit();
 
         res.status(201).json({
-            msg: 'Proyecto agregado con éxito',
+            msg: 'Proyecto y personajes agregados con éxito',
             proyecto: {
                 proyecto_id: nuevoProyecto.get('id_proyecto'),
-                nombre_proyecto: nuevoProyecto.get ('nombre_proyecto'),
-                director_proyecto: nuevoProyecto.get ('director_proyecto'),
-                lugar: nuevoProyecto.get ('lugar'),
-                descripcion: nuevoProyecto.get ('descripcion'),
-                fecha_pdv: nuevoProyecto.get ('fecha_pdv'),
+                nombre_proyecto: nuevoProyecto.get('nombre_proyecto'),
+                director_proyecto: nuevoProyecto.get('director_proyecto'),
+                lugar: nuevoProyecto.get('lugar'),
+                descripcion: nuevoProyecto.get('descripcion'),
+                fecha_pdv: nuevoProyecto.get('fecha_pdv'),
                 fecha_rodaje: nuevoProyecto.get('fecha_rodaje'),
-                user_id: nuevoProyecto.get ('user_id')
+                user_id: nuevoProyecto.get('user_id'),
+                personajes: personajes
             }
         });
     } catch (error) {
+        await t.rollback();
         console.error('Error al crear proyecto:', error);
         
         if (error instanceof Error) {
-            // Manejar errores específicos de Sequelize
             if (error.name === 'SequelizeValidationError') {
                 return res.status(400).json({ 
                     msg: 'Error de validación', 
@@ -209,24 +231,51 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
 }
 
 export const updateProyecto = async (req: AuthRequest, res: Response) => {
-    const { body } = req;
-    const { id } = req.params;
+    const t: Transaction = await db.transaction();
 
     try {
-        const proyecto = await Proyecto.findOne({ where: { id_proyecto: id, user_id: req.userId } });
-        if (proyecto) {
-            await proyecto.update(body);
-            res.json({
-                msg: 'Proyecto actualizado con éxito',
-                proyecto
-            });
-        } else {
-            res.status(404).json({
+        const { id } = req.params;
+        const { personajes, ...proyectoData } = req.body;
+
+        const proyecto = await Proyecto.findOne({ 
+            where: { id_proyecto: id, user_id: req.userId },
+            transaction: t
+        });
+
+        if (!proyecto) {
+            await t.rollback();
+            return res.status(404).json({
                 msg: `No existe un proyecto con el id ${id} para este usuario`
             });
         }
+
+        await proyecto.update(proyectoData, { transaction: t });
+
+        // Manejar personajes
+        if (personajes && Array.isArray(personajes)) {
+            // Eliminar personajes existentes
+            await Personaje.destroy({ where: { proyecto_id: id }, transaction: t });
+
+            // Crear nuevos personajes
+            await Promise.all(personajes.map(personaje => 
+                Personaje.create({ ...personaje, proyecto_id: id }, { transaction: t })
+            ));
+        }
+
+        await t.commit();
+
+        // Obtener el proyecto actualizado con sus personajes
+        const proyectoActualizado = await Proyecto.findByPk(id, {
+            include: [{ model: Personaje, as: 'personajes' }]
+        });
+
+        res.json({
+            msg: 'Proyecto y personajes actualizados con éxito',
+            proyecto: proyectoActualizado
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: 'Error al actualizar el proyecto' });
+        await t.rollback();
+        console.error('Error al actualizar el proyecto:', error);
+        res.status(500).json({ msg: 'Error al actualizar el proyecto', error });
     }
 }
