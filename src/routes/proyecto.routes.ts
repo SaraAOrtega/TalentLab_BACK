@@ -15,8 +15,9 @@ const router = Router();
 
 router.use(authenticateToken);
 
-router.get('/', getProyectos);
 router.get('/:id', getProyecto);
+router.get('/', getProyectos);
+
 router.post('/', createProyecto);
 router.put('/:id', updateProyecto);
 router.delete('/:id', deleteProyecto);

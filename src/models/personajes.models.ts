@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import db from '../db/connection';
+import PersonajeActor from "./personajeActores.models";
 
 class Personaje extends Model {
   public id_personaje!: number;
@@ -7,13 +8,22 @@ class Personaje extends Model {
   public rol!: string;
   public descripcion!: string;
 
+  // Declaración para la asociación many-to-many con Actor
+  public Actores?: any[];
+
   static associate(models: any) {
     Personaje.belongsTo(models.Proyecto, {
-        foreignKey: 'proyecto_id',
-        as: 'proyecto'
+      foreignKey: 'proyecto_id',
+      as: 'proyecto'
     });
-    // Añade aquí otras asociaciones si son necesarias
-}
+    
+    Personaje.belongsToMany(models.Actor, {
+      through: PersonajeActor,
+      foreignKey: 'personajeId',
+      otherKey: 'actorId',
+      as: 'actores'
+    });
+  }
 }
 
 Personaje.init({

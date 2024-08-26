@@ -1,12 +1,14 @@
+
 import express, { Application } from 'express';
 import cors from 'cors';
 import routesActor from '../routes/actor.routes';
 import routesUser from '../routes/user.routes';
 import routesProyectos from '../routes/proyecto.routes';
-import { Actor } from './actores.models';
+import Actor from './actores.models';
 import User from './user.models';
 import Proyecto from './proyectos.models';
 import Personaje from './personajes.models';
+import personajeActorRoutes from '../routes/personajeActor.routes';
 
 export class Server {
     private app: Application;
@@ -31,6 +33,7 @@ export class Server {
         this.app.use('/api/actores', routesActor);
         this.app.use('/api/users', routesUser);
         this.app.use('/api/proyectos', routesProyectos);
+        this.app.use('/api', personajeActorRoutes);
     }
 
     midlewares() {

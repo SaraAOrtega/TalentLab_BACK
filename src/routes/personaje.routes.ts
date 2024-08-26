@@ -9,8 +9,9 @@ import {
 
 const router = Router({ mergeParams: true });  // Importante: mergeParams: true
 
-router.get('/', getPersonajesByProyectoId);
 router.get('/:personajeId', getPersonaje);
+router.get('/', getPersonajesByProyectoId);
+
 router.post('/', createPersonaje);
 router.put('/:personajeId', updatePersonaje);
 router.delete('/:personajeId', deletePersonaje);
