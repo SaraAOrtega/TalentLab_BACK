@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import Personaje from '../models/personajes.models';
 
-
-
 interface AuthRequest extends Request {
     proyectoId?: number;
 }
@@ -129,28 +127,47 @@ export const deletePersonaje = async (req: Request, res: Response) => {
     }
 };
 
+
+
 export const updatePersonaje = async (req: Request, res: Response) => {
-    const { proyectoId, personajeId } = req.params;
+    const proyectoId = parseInt(req.params.proyectoId, 10);
+    const personajeId = parseInt(req.params.personajeId, 10);
     const { rol, descripcion } = req.body;
+
+    console.log('Actualizando personaje:', { proyectoId, personajeId, rol, descripcion });
 
     try {
         const personaje = await Personaje.findOne({
-            where: {
-                id_personaje: personajeId,
-                proyecto_id: proyectoId
+            where: { 
+                id_personaje: personajeId, 
+                proyecto_id: proyectoId 
             }
         });
 
         if (!personaje) {
+            console.log('No se encontró el personaje para actualizar');
             return res.status(404).json({ message: 'Personaje no encontrado en el proyecto' });
         }
 
-        await personaje.update({ rol, descripcion });
+        const updatedPersonaje = await personaje.update({ rol, descripcion });
 
-        res.status(200).json(personaje);
-    } catch (error) {
+        console.log('Personaje actualizado:', updatedPersonaje.toJSON());
+
+        res.status(200).json(updatedPersonaje);
+    } catch (error: unknown) {
         console.error('Error al actualizar personaje:', error);
-        res.status(500).json({ message: 'Error interno del servidor', error });
+        
+        if (error instanceof Error) {
+            res.status(500).json({ 
+                message: 'Error interno del servidor', 
+                error: error.message 
+            });
+        } else {
+            res.status(500).json({ 
+                message: 'Error interno del servidor', 
+                error: 'Un error desconocido ocurrió' 
+            });
+        }
     }
 };
 
