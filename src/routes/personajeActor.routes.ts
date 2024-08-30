@@ -3,6 +3,7 @@ import { associateActorToPersonaje } from '../controllers/personajeActor.control
 
 const router = express.Router();
 
-router.post('/asociar-actor-personaje', associateActorToPersonaje);
+// Ruta para asociar actores a un personaje específico
+router.post('/:personajeId/asociar-actor-personaje', associateActorToPersonaje);
 
 export default router;

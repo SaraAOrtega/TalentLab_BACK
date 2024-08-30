@@ -102,15 +102,27 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
             user_id: req.userId
         }, { transaction: t });
 
-        // Crear personajes asociados
+        // Crear personajes asociados y almacenarlos en un array
+        let personajesCreados: Personaje[] = [];
         if (personajes && Array.isArray(personajes)) {
-            await Promise.all(personajes.map(personaje =>
-                Personaje.create({ ...personaje, proyecto_id: nuevoProyecto.id_proyecto }, { transaction: t })
-            ));
+            personajesCreados = await Promise.all(
+                personajes.map((personaje: Personaje) =>
+                    Personaje.create({ ...personaje, proyecto_id: nuevoProyecto.id_proyecto }, { transaction: t })
+                )
+            );
         }
 
         await t.commit();
-        return res.status(201).json({ msg: 'Proyecto y personajes agregados con éxito', proyecto: nuevoProyecto });
+
+        // Enviar proyecto y personajes creados en la respuesta
+        return res.status(201).json({
+            msg: 'Proyecto y personajes agregados con éxito',
+            proyecto: {
+                id_proyecto: nuevoProyecto.id_proyecto, 
+                ...nuevoProyecto.toJSON(),
+                personajes: personajesCreados
+            }
+        });
     } catch (error) {
         await t.rollback();
         console.error('Error al crear proyecto:', error);
@@ -146,10 +158,11 @@ export const updateProyecto = async (req: AuthRequest, res: Response) => {
         if (personajes && Array.isArray(personajes)) {
             for (const personajeData of personajes) {
                 if (personajeData.id_personaje) {
-                    // Si el personaje tiene ID, actualizamos el personaje existente
+                    const personajeId = parseInt(personajeData.id_personaje, 10);
+
                     const personaje = await Personaje.findOne({
                         where: {
-                            id_personaje: personajeData.id_personaje,
+                            id_personaje: personajeId,
                             proyecto_id: id
                         },
                         transaction: t
@@ -157,10 +170,13 @@ export const updateProyecto = async (req: AuthRequest, res: Response) => {
 
                     if (personaje) {
                         await personaje.update(personajeData, { transaction: t });
+                        console.log(`Personaje actualizado: ${personajeId}`);
+                    } else {
+                        console.log(`Personaje no encontrado: ${personajeId}`);
                     }
                 } else {
-                    // Si el personaje no tiene ID, lo creamos
-                    await Personaje.create({ ...personajeData, proyecto_id: id }, { transaction: t });
+                    const nuevoPersonaje = await Personaje.create({ ...personajeData, proyecto_id: id }, { transaction: t });
+                    console.log(`Nuevo personaje creado: ${nuevoPersonaje.id_personaje}`);
                 }
             }
         }
@@ -175,9 +191,22 @@ export const updateProyecto = async (req: AuthRequest, res: Response) => {
             msg: 'Proyecto y personajes actualizados con éxito',
             proyecto: proyectoActualizado
         });
-    } catch (error) {
+    } catch (error: unknown) {
         await t.rollback();
         console.error('Error al actualizar el proyecto:', error);
-        res.status(500).json({ msg: 'Error al actualizar el proyecto', error });
+        
+        if (error instanceof Error) {
+            res.status(500).json({ 
+                msg: 'Error al actualizar el proyecto', 
+                error: error.message 
+            });
+        } else {
+            res.status(500).json({ 
+                msg: 'Error al actualizar el proyecto', 
+                error: 'Un error desconocido ocurrió' 
+            });
+        }
     }
 };
+
+export default AuthRequest;
