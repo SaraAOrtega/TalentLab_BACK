@@ -4,8 +4,12 @@ import PersonajeActor from "./personajeActores.models";
 
 class Actor extends Model {
   public id_actor!: number;
-  public nombre!: string;
-  public apellido!: string;
+  public nombre_actor!: string;
+  public fecha_nacimiento_actor!: Date;
+  public email_actor!: string;
+  public telefono_actor!: string;
+  public foto_actor!: string;
+
 
   // Declaración para la asociación many-to-many con Personaje
   public Personajes?: any[];

@@ -54,6 +54,8 @@ export const associateActorToPersonaje = async (req: Request, res: Response) => 
       }
     });
 
+  
+
     await Promise.all(associations);
     await t.commit();
     res.status(200).json({ message: 'Actores asociados al personaje con éxito' });
@@ -62,6 +64,72 @@ export const associateActorToPersonaje = async (req: Request, res: Response) => 
     console.error('Error al asociar actor a personaje:', error);
     res.status(500).json({ 
       message: 'Error al asociar actor a personaje', 
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+
+}
+
+export const desasociarActorDePersonaje = async (req: Request, res: Response) => {
+  const { personajeId, actorId } = req.params;
+
+  try {
+    // Validar que los IDs son números válidos
+    if (!personajeId || isNaN(Number(personajeId)) || !actorId || isNaN(Number(actorId))) {
+      return res.status(400).json({ message: 'IDs inválidos' });
+    }
+
+    // Buscar y eliminar la asociación
+    const resultado = await PersonajeActor.destroy({
+      where: {
+        personajeId: Number(personajeId),
+        actorId: Number(actorId)
+      }
+    });
+
+    if (resultado) {
+      return res.status(200).json({ message: 'Asociación eliminada con éxito' });
+    } else {
+      return res.status(404).json({ message: 'Asociación no encontrada' });
+    }
+  } catch (error) {
+    console.error('Error al desasociar actor de personaje:', error);
+    return res.status(500).json({
+      message: 'Error interno del servidor',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+
+}
+
+export const getActoresAsociadosConPersonaje = async (req: Request, res: Response) => {
+  const { personajeId } = req.params;
+
+  try {
+    // Validar que el ID es un número válido
+    if (!personajeId || isNaN(Number(personajeId))) {
+      return res.status(400).json({ message: 'ID de personaje inválido' });
+    }
+
+    // Obtener actores asociados al personaje
+    const actores = await Actor.findAll({
+      include: [{
+        model: Personaje,
+        through: { attributes: [] }, // Excluir atributos de la tabla intermedia
+        where: { id_personaje: Number(personajeId) },
+        as: 'Personajes'
+      }]
+    });
+
+    if (actores.length > 0) {
+      return res.status(200).json(actores);
+    } else {
+      return res.status(404).json({ message: 'No se encontraron actores asociados' });
+    }
+  } catch (error) {
+    console.error('Error al obtener actores asociados:', error);
+    return res.status(500).json({
+      message: 'Error interno del servidor',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
   }

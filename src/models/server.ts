@@ -33,7 +33,7 @@ export class Server {
         this.app.use('/api/actores', routesActor);
         this.app.use('/api/users', routesUser);
         this.app.use('/api/proyectos', routesProyectos);
-        this.app.use('/api', personajeActorRoutes);
+        this.app.use('/api/personajes', personajeActorRoutes);
     }
 
     midlewares() {
