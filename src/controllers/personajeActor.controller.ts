@@ -54,11 +54,8 @@ export const associateActorToPersonaje = async (req: Request, res: Response) => 
       }
     });
 
-<<<<<<< HEAD
   
 
-=======
->>>>>>> 62633c7e5217f83d0368e8806a86bdf4780859c4
     await Promise.all(associations);
     await t.commit();
     res.status(200).json({ message: 'Actores asociados al personaje con éxito' });
@@ -70,7 +67,6 @@ export const associateActorToPersonaje = async (req: Request, res: Response) => 
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
   }
-<<<<<<< HEAD
 
 }
 
@@ -137,6 +133,4 @@ export const getActoresAsociadosConPersonaje = async (req: Request, res: Respons
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
   }
-=======
->>>>>>> 62633c7e5217f83d0368e8806a86bdf4780859c4
 };
