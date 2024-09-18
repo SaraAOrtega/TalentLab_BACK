@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken';
-import { SECRET_KEY } from '../../config'; // Asegúrate de que la ruta sea correcta
+import { SECRET_KEY } from '../../config'; 
 
 interface AuthRequest extends Request {
     userId?: number;

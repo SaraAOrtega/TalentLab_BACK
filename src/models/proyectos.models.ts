@@ -12,7 +12,7 @@ class Proyecto extends Model {
   public lugar!: string;
   public descripcion!: string;
 
-  // Declaración de asociaciones
+
   static associate(models: any) {
     Proyecto.hasMany(models.Personaje, { 
         foreignKey: 'proyecto_id', 
@@ -24,8 +24,6 @@ class Proyecto extends Model {
     });
 }
 }
-
-
 Proyecto.init({
   id_proyecto: {
     type: DataTypes.INTEGER,
@@ -36,7 +34,7 @@ Proyecto.init({
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users', // Asegúrate de que este sea el nombre correcto de tu tabla de usuarios
+      model: 'Users', 
       key: 'id'
     }
   },
@@ -66,7 +64,7 @@ Proyecto.init({
 }, {
   sequelize: db,
   modelName: 'Proyecto',
-  tableName: 'Proyectos' // Asegúrate de que este sea el nombre correcto de tu tabla en la base de datos
+  tableName: 'Proyectos' 
 });
 
 export default Proyecto;

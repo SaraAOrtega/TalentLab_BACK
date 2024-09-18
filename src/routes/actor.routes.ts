@@ -1,5 +1,4 @@
 
-
 import {Router} from 'express'; 
 import { getActorById, getActores } from '../controllers/actor.controllers';
 import authenticateToken from '../middlewares/authenticateToken';

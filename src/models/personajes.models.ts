@@ -51,7 +51,7 @@ Personaje.init({
   sequelize: db,
   modelName: 'Personaje',
   tableName: 'Personajes',
-  timestamps: false // Desactiva los campos createdAt y updatedAt
+  timestamps: false
 });
 
 export default Personaje;

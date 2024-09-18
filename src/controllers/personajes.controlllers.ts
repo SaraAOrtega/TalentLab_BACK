@@ -9,8 +9,6 @@ interface AuthRequest extends Request {
 export const getPersonajesByProyectoId = async (req: Request, res: Response) => {
     const proyectoId = req.proyectoId as number;
 
-    console.log('Obteniendo personajes para el proyecto:', proyectoId);
-
     try {
         const personajes = await Personaje.findAll({
             where: {
@@ -24,8 +22,7 @@ export const getPersonajesByProyectoId = async (req: Request, res: Response) => 
 
         res.status(200).json(personajes);
     } catch (error: unknown) {
-        console.error('Error al obtener personajes:', error);
-        
+       
         if (error instanceof Error) {
             res.status(500).json({ 
                 message: 'Error interno del servidor', 
@@ -79,7 +76,7 @@ export const getPersonaje = async (req: Request, res: Response) => {
 };
 // Crear un nuevo personaje para un proyecto específico
 export const createPersonaje = async (req: Request, res: Response) => {
-    const { proyectoId } = req.params; // ID del proyecto desde los parámetros de la URL
+    const { proyectoId } = req.params; 
     const { rol, descripcion } = req.body;
 
     if (!proyectoId) {
@@ -99,7 +96,8 @@ export const createPersonaje = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error interno del servidor', error });
     }
 };
-// Opcional: Eliminar un personaje de un proyecto específico
+
+// Eliminar un personaje de un proyecto específico
 export const deletePersonaje = async (req: Request, res: Response) => {
     const { personajeId, proyectoId } = req.params;
 
@@ -128,7 +126,6 @@ export const deletePersonaje = async (req: Request, res: Response) => {
 };
 
 
-
 export const updatePersonaje = async (req: Request, res: Response) => {
     const proyectoId = parseInt(req.params.proyectoId, 10);
     const personajeId = parseInt(req.params.personajeId, 10);
@@ -145,17 +142,17 @@ export const updatePersonaje = async (req: Request, res: Response) => {
         });
 
         if (!personaje) {
-            console.log('No se encontró el personaje para actualizar');
+           
             return res.status(404).json({ message: 'Personaje no encontrado en el proyecto' });
         }
 
         const updatedPersonaje = await personaje.update({ rol, descripcion });
 
-        console.log('Personaje actualizado:', updatedPersonaje.toJSON());
+       
 
         res.status(200).json(updatedPersonaje);
     } catch (error: unknown) {
-        console.error('Error al actualizar personaje:', error);
+       
         
         if (error instanceof Error) {
             res.status(500).json({ 

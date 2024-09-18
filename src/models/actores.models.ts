@@ -34,19 +34,60 @@ Actor.init({
     type: DataTypes.STRING,
     allowNull: false
   },
-  fecha_nacimiento_actor: {
-    type: DataTypes.DATE,
+  edad: {
+    type: DataTypes.NUMBER,
     allowNull: false
   },
-  email_actor: {
+  sexo: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  telefono_actor: {
+  altura: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  complexion: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  color_ojos: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  color_pelo: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  tipo_pelo: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  corte_pelo: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  tez: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  idiomas: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  skills: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  carnet_conducir: {
     type: DataTypes.STRING,
     allowNull: false
   },
   foto_actor: {
+    type: DataTypes.STRING,
+    allowNull: false
+  }, 
+  
+  foto2_actor: {
     type: DataTypes.STRING,
     allowNull: false
   },

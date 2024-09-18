@@ -1,8 +1,7 @@
 
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/connection";
-
-import { UserAttributes, UserCreationAttributes } from '../interfaces/user.interface'; // Asegúrate de que la ruta sea correcta
+import { UserAttributes, UserCreationAttributes } from '../interfaces/user.interface'; 
 
 const User = sequelize.define<Model<UserAttributes, UserCreationAttributes>>('User', {
   id_user: {

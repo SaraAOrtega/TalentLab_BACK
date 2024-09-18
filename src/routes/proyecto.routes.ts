@@ -13,16 +13,16 @@ import personajesRouter from './personaje.routes';
 
 const router = Router();
 
-// Middleware de autenticación
+
 router.use(authenticateToken);
 
 // Rutas de proyectos
-router.get('/:id', getProyecto);  // Obtener un proyecto por ID
-router.get('/', getProyectos);  // Obtener todos los proyectos
+router.get('/:id', getProyecto);  
+router.get('/', getProyectos);  
 
-router.post('/', createProyecto);  // Crear un nuevo proyecto
-router.put('/:id', updateProyecto);  // Actualizar un proyecto por ID
-router.delete('/:id', deleteProyecto);  // Eliminar un proyecto por ID
+router.post('/', createProyecto);  
+router.put('/:id', updateProyecto);  
+router.delete('/:id', deleteProyecto);  
 
 // Middleware para validar el proyectoId
 const validateProyectoId = (req: Request, res: Response, next: NextFunction) => {
