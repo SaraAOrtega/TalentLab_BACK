@@ -12,32 +12,37 @@ import personajeActorRoutes from "../routes/personajeActor.routes";
 import sequelize from "../db/connection"
 
 export class Server {
-  private app: Application;
+  public app: Application;
   private port: string;
 
   constructor() {
     this.app = express();
     this.port = process.env.PORT || "3001";
-    this.midlewares();
+    this.configure();
+  }
+
+  private configure() {
+    this.middlewares();
     this.routes();
-    this.dbConnect();
-    this.listen();
   }
 
-  listen() {
-    this.app.listen(this.port, () => {
-      console.log("Aplicación corriendo en el puerto " + this.port);
-    });
+  public async init() {
+    await this.dbConnect();
+    if (process.env.NODE_ENV !== 'production') {
+      this.app.listen(this.port, () => {
+        console.log("Aplicación corriendo en el puerto " + this.port);
+      });
+    }
   }
 
-  routes() {
+  private routes() {
     this.app.use("/api/actores", routesActor);
     this.app.use("/api/users", routesUser);
     this.app.use("/api/proyectos", routesProyectos);
     this.app.use("/api/personajes", personajeActorRoutes);
   }
 
-  midlewares() {
+  private middlewares() {
     this.app.use(express.json());
 
     // Configuración de CORS
@@ -55,7 +60,7 @@ export class Server {
     console.log(`Serving static files from: ${staticPath}`);
   }
 
-  async dbConnect() {
+  private async dbConnect() {
     try {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
