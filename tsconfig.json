@@ -14,12 +14,14 @@
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*", "src/types/*"]
-    }
+    },
+    "moduleResolution": "node",
+    "resolveJsonModule": true
   },
   "include": [
     "index.ts",
-  "src/**/*",
-  "types/**/*"
+    "src/**/*",
+    "types/**/*"
   ],
   "exclude": [
     "node_modules",
