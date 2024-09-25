@@ -9,7 +9,8 @@ import User from "./user.models";
 import Proyecto from "./proyectos.models";
 import Personaje from "./personajes.models";
 import personajeActorRoutes from "../routes/personajeActor.routes";
-import sequelize from "../db/connection"
+import sequelize from "../db/connection";
+import mysql from 'mysql2/promise'; // Importa mysql2
 
 export class Server {
   public app: Application;
@@ -27,11 +28,30 @@ export class Server {
   }
 
   public async init() {
+    await this.testDbConnection(); // Llama a la prueba de conexión aquí
     await this.dbConnect();
     if (process.env.NODE_ENV !== 'production') {
       this.app.listen(this.port, () => {
         console.log("Aplicación corriendo en el puerto " + this.port);
       });
+    }
+  }
+
+  private async testDbConnection() {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    try {
+      await connection.connect();
+      console.log('Connected to the database successfully!');
+    } catch (error) {
+      console.error('Error connecting to the database:', error);
+    } finally {
+      await connection.end();
     }
   }
 
@@ -44,7 +64,6 @@ export class Server {
 
   private middlewares() {
     this.app.use(express.json());
-
     // Configuración de CORS
     this.app.use(
       cors({
@@ -64,14 +83,11 @@ export class Server {
     try {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
-
       await Actor.sync();
       await User.sync();
       await Proyecto.sync();
       await Personaje.sync();
-
       this.initializeAssociations();
-
       console.log("Database synchronized and associations initialized.");
     } catch (error) {
       console.error("Unable to connect to the database:", error);
