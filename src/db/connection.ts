@@ -8,6 +8,7 @@ const dbHost = process.env.DB_HOST || 'localhost';
 const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   host: dbHost,
   dialect: "mysql",
+  dialectModule: require('mysql2'), 
   // Puedes agregar más opciones aquí si es necesario
 });
 
