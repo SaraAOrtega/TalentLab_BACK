@@ -9,6 +9,7 @@ import User from "./user.models";
 import Proyecto from "./proyectos.models";
 import Personaje from "./personajes.models";
 import personajeActorRoutes from "../routes/personajeActor.routes";
+import sequelize from "../db/connection"
 
 export class Server {
   private app: Application;
@@ -42,26 +43,28 @@ export class Server {
     // Configuración de CORS
     this.app.use(
       cors({
-        origin: "http://localhost:4200",
+        origin: process.env.FRONTEND_URL || "http://localhost:4200",
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
       })
     );
-    // Configuración para servir archivos estáticos desde la carpeta 'uploads'
-    this.app.use(
-      "/uploads",
-      express.static(path.join(__dirname, "../../uploads"))
-    );
+    
+    // Configuración para servir archivos estáticos
+    const staticPath = path.join(__dirname, '../../uploads');
+    this.app.use("/uploads", express.static(staticPath));
+    console.log(`Serving static files from: ${staticPath}`);
   }
 
   async dbConnect() {
     try {
+      await sequelize.authenticate();
+      console.log('Connection to the database has been established successfully.');
+
       await Actor.sync();
       await User.sync();
       await Proyecto.sync();
       await Personaje.sync();
 
-      // Inicializar asociaciones después de sincronizar los modelos
       this.initializeAssociations();
 
       console.log("Database synchronized and associations initialized.");
