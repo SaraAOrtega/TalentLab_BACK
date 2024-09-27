@@ -12,13 +12,13 @@ import personajeActorRoutes from "../routes/personajeActor.routes";
 import sequelize from "../db/connection";
 
 export class Server {
-  public app: Application;  // Cambiar a 'public'
+  public app: Application;
   private port: string;
 
   constructor() {
     this.app = express();
     this.port = process.env.PORT || "3001";
-    this.midlewares();
+    this.middlewares();
     this.routes();
   }
 
@@ -40,7 +40,7 @@ export class Server {
     this.app.use("/api/personajes", personajeActorRoutes);
   }
 
-  midlewares() {
+  middlewares() {
     this.app.use(express.json());
 
     // Configuración de CORS
@@ -87,3 +87,4 @@ export class Server {
 }
 
 export default Server;
+
