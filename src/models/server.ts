@@ -10,84 +10,69 @@ import Proyecto from "./proyectos.models";
 import Personaje from "./personajes.models";
 import personajeActorRoutes from "../routes/personajeActor.routes";
 import sequelize from "../db/connection";
-import mysql from 'mysql2/promise'; // Importa mysql2
+import dotenv from "dotenv";  // <--- Importar dotenv
+
+// Cargar las variables de entorno desde el archivo .env
+dotenv.config();  // <--- Asegurarse de que dotenv esté configurado
 
 export class Server {
-  public app: Application;
+  private app: Application;
   private port: string;
 
   constructor() {
     this.app = express();
-    this.port = process.env.PORT || "3001";
-    this.configure();
-  }
-
-  private configure() {
-    this.middlewares();
+    this.port = process.env.PORT || "3001";  // Usar el puerto de las variables de entorno o 3001 por defecto
+    this.midlewares();
     this.routes();
+    this.dbConnect();
+    this.listen();
   }
 
-  public async init() {
-    await this.testDbConnection(); // Llama a la prueba de conexión aquí
-    await this.dbConnect();
-    if (process.env.NODE_ENV !== 'production') {
-      this.app.listen(this.port, () => {
-        console.log("Aplicación corriendo en el puerto " + this.port);
-      });
-    }
-  }
-
-  private async testDbConnection() {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
+  listen() {
+    this.app.listen(this.port, () => {
+      console.log("Aplicación corriendo en el puerto " + this.port);
     });
-
-    try {
-      await connection.connect();
-      console.log('Connected to the database successfully!');
-    } catch (error) {
-      console.error('Error connecting to the database:', error);
-    } finally {
-      await connection.end();
-    }
   }
 
-  private routes() {
+  routes() {
     this.app.use("/api/actores", routesActor);
     this.app.use("/api/users", routesUser);
     this.app.use("/api/proyectos", routesProyectos);
     this.app.use("/api/personajes", personajeActorRoutes);
   }
 
-  private middlewares() {
+  midlewares() {
     this.app.use(express.json());
+
     // Configuración de CORS
     this.app.use(
       cors({
-        origin: process.env.FRONTEND_URL || "http://localhost:4200",
+        origin: process.env.FRONTEND_URL || "http://localhost:4200",  // Usar la URL del frontend desde las variables de entorno
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
       })
     );
-    
+
     // Configuración para servir archivos estáticos
     const staticPath = path.join(__dirname, '../../uploads');
     this.app.use("/uploads", express.static(staticPath));
     console.log(`Serving static files from: ${staticPath}`);
   }
 
-  private async dbConnect() {
+  async dbConnect() {
     try {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
+
+      // Sincronizar los modelos
       await Actor.sync();
       await User.sync();
       await Proyecto.sync();
       await Personaje.sync();
+
+      // Inicializar asociaciones
       this.initializeAssociations();
+
       console.log("Database synchronized and associations initialized.");
     } catch (error) {
       console.error("Unable to connect to the database:", error);
