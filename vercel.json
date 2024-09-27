@@ -2,14 +2,30 @@
   "version": 2,
   "builds": [
     {
+<<<<<<< HEAD
       "src": "dist/index.js", 
       "use": "@vercel/node"
+=======
+      "src": "package.json",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["dist/**"]
+      }
+>>>>>>> b134f218281965c4645351956579a242be39dba4
     }
   ],
   "routes": [
     {
+<<<<<<< HEAD
       "src": "/api/(.*)", 
       "dest": "/dist/index.js" 
     }
   ]
 }
+=======
+      "src": "(.*)",
+      "dest": "dist/index.js"
+    }
+  ]
+}
+>>>>>>> b134f218281965c4645351956579a242be39dba4
