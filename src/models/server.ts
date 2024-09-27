@@ -10,21 +10,20 @@ import Proyecto from "./proyectos.models";
 import Personaje from "./personajes.models";
 import personajeActorRoutes from "../routes/personajeActor.routes";
 import sequelize from "../db/connection";
-import dotenv from "dotenv";  // <--- Importar dotenv
-
-// Cargar las variables de entorno desde el archivo .env
-dotenv.config();  // <--- Asegurarse de que dotenv esté configurado
 
 export class Server {
-  private app: Application;
+  public app: Application;  // Cambiar a 'public'
   private port: string;
 
   constructor() {
     this.app = express();
-    this.port = process.env.PORT || "3001";  // Usar el puerto de las variables de entorno o 3001 por defecto
+    this.port = process.env.PORT || "3001";
     this.midlewares();
     this.routes();
-    this.dbConnect();
+  }
+
+  async init() {
+    await this.dbConnect();
     this.listen();
   }
 
@@ -47,7 +46,7 @@ export class Server {
     // Configuración de CORS
     this.app.use(
       cors({
-        origin: process.env.FRONTEND_URL || "http://localhost:4200",  // Usar la URL del frontend desde las variables de entorno
+        origin: process.env.FRONTEND_URL || "http://localhost:4200",
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
       })
@@ -64,13 +63,11 @@ export class Server {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
 
-      // Sincronizar los modelos
       await Actor.sync();
       await User.sync();
       await Proyecto.sync();
       await Personaje.sync();
 
-      // Inicializar asociaciones
       this.initializeAssociations();
 
       console.log("Database synchronized and associations initialized.");
