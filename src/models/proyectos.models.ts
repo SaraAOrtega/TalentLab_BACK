@@ -35,7 +35,7 @@ Proyecto.init({
     allowNull: false,
     references: {
       model: 'Users', 
-      key: 'id'
+      key: 'id_user'
     }
   },
   nombre_proyecto: {
