@@ -35,7 +35,7 @@ Actor.init({
     allowNull: false
   },
   edad: {
-    type: DataTypes.NUMBER,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   sexo: {
