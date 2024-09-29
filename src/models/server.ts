@@ -64,25 +64,20 @@ export class Server {
   async dbConnect() {
     try {
       await sequelize.authenticate();
-      console.log('Conexión a la base de datos establecida correctamente.');
-  
-      // Cambia esta línea:
-      // await Actor.sync({ alter: true });
-      // await User.sync({ alter: true });
-      // await Proyecto.sync({ alter: true });
-      // await Personaje.sync({ alter: true });
-  
-      // Sincroniza los modelos sin recrear las tablas
-      await sequelize.sync(); // Esto sincroniza los modelos sin eliminar las tablas existentes
-  
+      console.log('Connection to the database has been established successfully.');
+
+      await Actor.sync({ alter: true });
+      await User.sync({ alter: true });
+      await Proyecto.sync({ alter: true });
+      await Personaje.sync({ alter: true });
+
       this.initializeAssociations();
-  
-      console.log("Base de datos sincronizada y asociaciones inicializadas.");
+
+      console.log("Database synchronized and associations initialized.");
     } catch (error) {
-      console.error("No se pudo conectar a la base de datos:", error);
+      console.error("Unable to connect to the database:", error);
     }
   }
-  
 
   private initializeAssociations() {
     const models = { Actor, User, Proyecto, Personaje };
