@@ -26,14 +26,17 @@ async function syncDatabase() {
     await Personaje.sync({ alter: true });
     await PersonajeActor.sync({ alter: true });
 
-    // Intentar eliminar la clave foránea existente (si existe)
-    try {
-      await db.query('ALTER TABLE Proyectos DROP FOREIGN KEY Proyectos_ibfk_1', { type: QueryTypes.RAW });
-    } catch (error) {
-      console.log('La clave foránea Proyectos_ibfk_1 no existía o no se pudo eliminar.');
+    // Intentar eliminar las claves foráneas existentes
+    const tables = ['Proyectos', 'Personajes', 'PersonajesActores'];
+    for (const table of tables) {
+      try {
+        await db.query(`ALTER TABLE ${table} DROP FOREIGN KEY ${table}_ibfk_1`, { type: QueryTypes.RAW });
+      } catch (error) {
+        console.log(`La clave foránea ${table}_ibfk_1 no existía o no se pudo eliminar.`);
+      }
     }
 
-    // Crear o actualizar la clave foránea
+    // Crear o actualizar las claves foráneas
     await db.query(`
       ALTER TABLE Proyectos 
       ADD CONSTRAINT fk_proyecto_user 
@@ -42,6 +45,17 @@ async function syncDatabase() {
       ON DELETE CASCADE 
       ON UPDATE CASCADE
     `, { type: QueryTypes.RAW });
+
+    await db.query(`
+      ALTER TABLE Personajes 
+      ADD CONSTRAINT fk_personaje_proyecto 
+      FOREIGN KEY (proyecto_id) 
+      REFERENCES Proyectos (id_proyecto) 
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
+    `, { type: QueryTypes.RAW });
+
+    // Añade aquí otras claves foráneas si es necesario
 
     console.log('Base de datos sincronizada correctamente');
   } catch (error) {
