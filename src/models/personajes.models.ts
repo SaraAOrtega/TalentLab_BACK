@@ -34,7 +34,11 @@ Personaje.init({
   },
   proyecto_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    references: {
+      model: 'Proyectos',
+      key: 'id_proyecto'
+    }
   },
   rol: {
     type: DataTypes.STRING,
@@ -46,7 +50,10 @@ Personaje.init({
 }, {
   sequelize: db,
   modelName: 'Personaje',
-  tableName: 'Personajes'
+  tableName: 'Personajes',
+  timestamps: false, // Asegúrate de que esto esté deshabilitado
+  createdAt: false,  // Previene la creación de createdAt
+  updatedAt: false   // Previene la creación de updatedAt
 });
 
 export default Personaje;

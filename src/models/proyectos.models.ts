@@ -60,7 +60,10 @@ Proyecto.init({
 }, {
   sequelize: db,
   modelName: 'Proyecto',
-  tableName: 'Proyectos'
+  tableName: 'Proyectos',
+  timestamps: false, // Asegúrate de que esto esté deshabilitado
+  createdAt: false,  // Previene la creación de createdAt
+  updatedAt: false   // Previene la creación de updatedAt
 });
 
 export default Proyecto;
