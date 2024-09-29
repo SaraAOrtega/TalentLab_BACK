@@ -32,11 +32,7 @@ Proyecto.init({
   },
   user_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Users', 
-      key: 'id_user'
-    }
+    allowNull: false
   },
   nombre_proyecto: {
     type: DataTypes.STRING,
@@ -64,13 +60,7 @@ Proyecto.init({
 }, {
   sequelize: db,
   modelName: 'Proyecto',
-  tableName: 'Proyectos',
-  indexes: [
-    {
-      fields: ['user_id'],
-      name: 'fk_proyecto_user'
-    }
-  ]
+  tableName: 'Proyectos'
 });
 
 export default Proyecto;
