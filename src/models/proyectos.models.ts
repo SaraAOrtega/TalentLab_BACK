@@ -1,7 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import db from '../db/connection';
 
-
 class Proyecto extends Model {
   public id_proyecto!: number;
   public user_id!: number;
@@ -12,18 +11,19 @@ class Proyecto extends Model {
   public lugar!: string;
   public descripcion!: string;
 
-
   static associate(models: any) {
     Proyecto.hasMany(models.Personaje, { 
-        foreignKey: 'proyecto_id', 
-        as: 'personajes' 
+      foreignKey: 'proyecto_id', 
+      as: 'personajes' 
     });
     Proyecto.belongsTo(models.User, { 
-        foreignKey: 'user_id', 
-        as: 'user' 
+      foreignKey: 'user_id', 
+      as: 'user',
+      targetKey: 'id_user'
     });
+  }
 }
-}
+
 Proyecto.init({
   id_proyecto: {
     type: DataTypes.INTEGER,
@@ -64,7 +64,13 @@ Proyecto.init({
 }, {
   sequelize: db,
   modelName: 'Proyecto',
-  tableName: 'Proyectos' 
+  tableName: 'Proyectos',
+  indexes: [
+    {
+      fields: ['user_id'],
+      name: 'fk_proyecto_user'
+    }
+  ]
 });
 
 export default Proyecto;

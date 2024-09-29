@@ -1,27 +1,37 @@
 import db from '../db/connection';
-import Proyecto from '../models/proyectos.models';
-import Personaje from '../models/personajes.models';
 import User from '../models/user.models';
 import Actor from '../models/actores.models';
+import Proyecto from '../models/proyectos.models';
+import Personaje from '../models/personajes.models';
 import PersonajeActor from '../models/personajeActores.models';
 
-// Importar modelos y asociaciones
-const models = { Proyecto, Personaje, User, Actor, PersonajeActor };
+const models = { User, Actor, Proyecto, Personaje, PersonajeActor };
 
-// Configurar asociaciones
 function initializeAssociations() {
-  Proyecto.associate(models);
-  Personaje.associate(models);
-  Actor.associate(models);
+  Object.values(models).forEach((model: any) => {
+    if (typeof model.associate === "function") {
+      model.associate(models);
+    }
+  });
 }
 
-initializeAssociations();
+async function syncDatabase() {
+  try {
+    initializeAssociations();
 
-// Sincroniza la base de datos
-db.sync().then(() => {
-  console.log('Base de datos sincronizada');
-}).catch(err => {
-  console.error('Error al sincronizar la base de datos:', err);
-});
+    // Sincroniza los modelos en orden
+    await User.sync({ alter: true });
+    await Actor.sync({ alter: true });
+    await Proyecto.sync({ alter: true });
+    await Personaje.sync({ alter: true });
+    await PersonajeActor.sync({ alter: true });
 
-export { Proyecto, Personaje, User, Actor, PersonajeActor };
+    console.log('Base de datos sincronizada correctamente');
+  } catch (error) {
+    console.error('Error al sincronizar la base de datos:', error);
+  }
+}
+
+syncDatabase();
+
+export { User, Actor, Proyecto, Personaje, PersonajeActor };
