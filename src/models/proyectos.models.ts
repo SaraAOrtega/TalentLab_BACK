@@ -35,7 +35,7 @@ Proyecto.init({
     allowNull: false,
     references: {
       model: 'Users', 
-      key: 'id'
+      key: 'id_user'
     }
   },
   nombre_proyecto: {
@@ -64,7 +64,8 @@ Proyecto.init({
 }, {
   sequelize: db,
   modelName: 'Proyecto',
-  tableName: 'Proyectos' 
+  tableName: 'Proyectos',
+  timestamps: false
 });
 
 export default Proyecto;
