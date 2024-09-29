@@ -51,9 +51,7 @@ Personaje.init({
   sequelize: db,
   modelName: 'Personaje',
   tableName: 'Personajes',
-  timestamps: false, // Asegúrate de que esto esté deshabilitado
-  createdAt: false,  // Previene la creación de createdAt
-  updatedAt: false   // Previene la creación de updatedAt
+  timestamps: false
 });
 
 export default Personaje;
