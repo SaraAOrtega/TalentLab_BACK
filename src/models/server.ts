@@ -10,6 +10,9 @@ import Proyecto from "./proyectos.models";
 import Personaje from "./personajes.models";
 import personajeActorRoutes from "../routes/personajeActor.routes";
 import sequelize from "../db/connection";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export class Server {
   public app: Application;
@@ -63,10 +66,10 @@ export class Server {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
 
-      await Actor.sync();
-      await User.sync();
-      await Proyecto.sync();
-      await Personaje.sync();
+      await Actor.sync({ alter: true });
+      await User.sync({ alter: true });
+      await Proyecto.sync({ alter: true });
+      await Personaje.sync({ alter: true });
 
       this.initializeAssociations();
 
@@ -87,4 +90,3 @@ export class Server {
 }
 
 export default Server;
-
