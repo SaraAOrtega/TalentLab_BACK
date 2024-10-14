@@ -19,7 +19,7 @@ class Actor extends Model {
       through: PersonajeActor,
       foreignKey: 'actorId',
       otherKey: 'personajeId',
-      as: 'Personajes'
+      as: 'personajes'
     });
   }
 }
@@ -94,7 +94,7 @@ Actor.init({
 }, {
   sequelize: db,
   modelName: 'Actor',
-  tableName: 'Actores',
+  tableName: 'actores',
   timestamps: false
 });
 

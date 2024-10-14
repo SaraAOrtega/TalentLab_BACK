@@ -8,7 +8,7 @@ PersonajeActor.init({
     type: DataTypes.INTEGER,
     primaryKey: true,
     references: {
-      model: 'Actores',
+      model: 'actores',
       key: 'id_actor'
     }
   },
@@ -16,7 +16,7 @@ PersonajeActor.init({
     type: DataTypes.INTEGER,
     primaryKey: true,
     references: {
-      model: 'Personajes',
+      model: 'personajes',
       key: 'id_personaje'
     }
   }

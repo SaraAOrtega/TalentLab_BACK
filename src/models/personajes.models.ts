@@ -36,7 +36,7 @@ Personaje.init({
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Proyectos',
+      model: 'proyectos',
       key: 'id_proyecto'
     }
   },
@@ -50,7 +50,7 @@ Personaje.init({
 }, {
   sequelize: db,
   modelName: 'Personaje',
-  tableName: 'Personajes',
+  tableName: 'personajes',
   timestamps: false
 });
 
