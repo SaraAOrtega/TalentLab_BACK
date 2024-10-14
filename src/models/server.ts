@@ -49,10 +49,7 @@ export class Server {
     // Configuración de CORS
     this.app.use(
       cors({
-        origin: [
-          "http://localhost:4200",
-          "https://talent-lab-one.vercel.app"
-        ],
+        origin: ['https://talent-lab-one.vercel.app', 'http://localhost:4200'],
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
       })
