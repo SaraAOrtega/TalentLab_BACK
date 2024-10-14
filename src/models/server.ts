@@ -4,14 +4,18 @@ import path from "path";
 import routesActor from "../routes/actor.routes";
 import routesUser from "../routes/user.routes";
 import routesProyectos from "../routes/proyecto.routes";
+import personajeActorRoutes from "../routes/personajeActor.routes";
+import sequelize from "../db/connection";
+import dotenv from 'dotenv';
+import fs from 'fs'; // Para verificar la existencia de la carpeta 'uploads'
+
+// Modelos
 import Actor from "./actores.models";
 import User from "./user.models";
 import Proyecto from "./proyectos.models";
 import Personaje from "./personajes.models";
-import personajeActorRoutes from "../routes/personajeActor.routes";
-import sequelize from "../db/connection";
-import dotenv from 'dotenv';
 
+// Cargar variables de entorno
 dotenv.config();
 
 export class Server {
@@ -25,17 +29,24 @@ export class Server {
     this.routes();
   }
 
+  // Inicia el servidor y la base de datos
   async init() {
-    await this.dbConnect();
-    this.listen();
+    try {
+      await this.dbConnect();
+      this.listen();
+    } catch (error) {
+      console.error("Error al iniciar el servidor:", error);
+    }
   }
 
+  // Escucha en el puerto definido
   listen() {
     this.app.listen(this.port, () => {
-      console.log("Aplicación corriendo en el puerto " + this.port);
+      console.log(`Aplicación corriendo en el puerto ${this.port}`);
     });
   }
 
+  // Define las rutas de la aplicación
   routes() {
     this.app.use("/api/actores", routesActor);
     this.app.use("/api/users", routesUser);
@@ -43,6 +54,7 @@ export class Server {
     this.app.use("/api/personajes", personajeActorRoutes);
   }
 
+  // Middlewares
   middlewares() {
     this.app.use(express.json());
 
@@ -58,24 +70,33 @@ export class Server {
     // Configuración para servir archivos estáticos
     const staticPath = path.join(__dirname, '../../uploads');
     this.app.use("/uploads", express.static(staticPath));
-    console.log(`Serving static files from: ${staticPath}`);
+
+    // Verificación de la existencia de la carpeta 'uploads'
+    if (fs.existsSync(staticPath)) {
+      console.log(`Sirviendo archivos estáticos desde: ${staticPath}`);
+    } else {
+      console.error(`La carpeta ${staticPath} no existe. Asegúrate de que la carpeta 'uploads' esté disponible.`);
+    }
   }
 
+  // Conexión a la base de datos
   async dbConnect() {
     try {
       await sequelize.authenticate();
-      console.log('Connection to the database has been established successfully.');
-  
-      // En lugar de sync, usa esto solo para verificar la conexión
+      console.log('Conexión a la base de datos establecida con éxito.');
+
+      // Verifica la conexión a la base de datos
       await sequelize.query('SELECT 1');
-  
+
       this.initializeAssociations();
-  
-      console.log("Database connection verified and associations initialized.");
+      console.log("Conexión verificada y asociaciones inicializadas.");
     } catch (error) {
-      console.error("Unable to connect to the database:", error);
+      console.error("No se pudo conectar a la base de datos:", error);
+      throw error;  // Lanza el error para que `init` lo maneje
     }
   }
+
+  // Inicialización de las asociaciones entre los modelos
   private initializeAssociations() {
     const models = { Actor, User, Proyecto, Personaje };
     Object.values(models).forEach((model: any) => {
