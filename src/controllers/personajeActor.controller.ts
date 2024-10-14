@@ -146,7 +146,7 @@ export const getActoresAsociadosConPersonaje = async (
           model: Personaje,
           through: { attributes: [] },
           where: { id_personaje: Number(personajeId) },
-          as: "Personajes",
+          as: "personajes",
         },
       ],
     });
