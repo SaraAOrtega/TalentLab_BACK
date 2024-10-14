@@ -23,7 +23,7 @@ PersonajeActor.init({
 }, {
   sequelize,
   modelName: 'PersonajeActor',
-  tableName: 'personajeActores',
+  tableName: 'personajeactores',
   timestamps: false
 });
 
