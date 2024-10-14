@@ -23,9 +23,10 @@ export const getProyectos = async (req: AuthRequest, res: Response) => {
     return res.json(listProyectos);
   } catch (error) {
     console.error("Error al obtener proyectos:", error);
-    return res
-      .status(500)
-      .json({ msg: "Error al obtener los proyectos", error });
+    return res.status(500).json({ 
+      msg: "Error al obtener los proyectos", 
+      error: error instanceof Error ? error.message : 'Error desconocido' 
+    });
   }
 };
 
@@ -56,7 +57,10 @@ export const getProyecto = async (req: AuthRequest, res: Response) => {
     return res.json(proyecto);
   } catch (error) {
     console.error("Error al obtener el proyecto:", error);
-    return res.status(500).json({ msg: "Error al obtener el proyecto", error });
+    return res.status(500).json({ 
+      msg: "Error al obtener el proyecto", 
+      error: error instanceof Error ? error.message : 'Error desconocido' 
+    });
   }
 };
 
@@ -74,20 +78,19 @@ export const deleteProyecto = async (req: AuthRequest, res: Response) => {
     });
 
     if (!proyecto) {
-      return res
-        .status(404)
-        .json({
-          msg: `No existe el proyecto con el id ${id} para este usuario`,
-        });
+      return res.status(404).json({
+        msg: `No existe el proyecto con el id ${id} para este usuario`,
+      });
     }
 
     await proyecto.destroy();
     return res.json({ msg: "Proyecto eliminado con éxito" });
   } catch (error) {
     console.error("Error al eliminar proyecto:", error);
-    return res
-      .status(500)
-      .json({ msg: "Error al eliminar el proyecto", error });
+    return res.status(500).json({ 
+      msg: "Error al eliminar el proyecto", 
+      error: error instanceof Error ? error.message : 'Error desconocido' 
+    });
   }
 };
 
@@ -129,7 +132,7 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
     let personajesCreados: Personaje[] = [];
     if (personajes && Array.isArray(personajes)) {
       personajesCreados = await Promise.all(
-        personajes.map((personaje: Personaje) =>
+        personajes.map((personaje: any) =>
           Personaje.create(
             { ...personaje, proyecto_id: nuevoProyecto.id_proyecto },
             { transaction: t }
@@ -144,7 +147,6 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
     return res.status(201).json({
       msg: "Proyecto y personajes agregados con éxito",
       proyecto: {
-        id_proyecto: nuevoProyecto.id_proyecto,
         ...nuevoProyecto.toJSON(),
         personajes: personajesCreados,
       },
@@ -152,7 +154,10 @@ export const createProyecto = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     await t.rollback();
     console.error("Error al crear proyecto:", error);
-    return res.status(500).json({ msg: "Error al crear el proyecto", error });
+    return res.status(500).json({ 
+      msg: "Error al crear el proyecto", 
+      error: error instanceof Error ? error.message : 'Error desconocido' 
+    });
   }
 };
 
@@ -166,14 +171,14 @@ export const updateProyecto = async (req: AuthRequest, res: Response) => {
 
     // Buscar el proyecto
     const proyecto = await Proyecto.findOne({
-      where: { id_proyecto: id },
+      where: { id_proyecto: id, user_id: req.userId },
       transaction: t,
     });
 
     if (!proyecto) {
       await t.rollback();
       return res.status(404).json({
-        msg: `No existe un proyecto con el id ${id}`,
+        msg: `No existe un proyecto con el id ${id} para este usuario`,
       });
     }
 
@@ -220,21 +225,13 @@ export const updateProyecto = async (req: AuthRequest, res: Response) => {
       msg: "Proyecto y personajes actualizados con éxito",
       proyecto: proyectoActualizado,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     await t.rollback();
     console.error("Error al actualizar el proyecto:", error);
-
-    if (error instanceof Error) {
-      res.status(500).json({
-        msg: "Error al actualizar el proyecto",
-        error: error.message,
-      });
-    } else {
-      res.status(500).json({
-        msg: "Error al actualizar el proyecto",
-        error: "Un error desconocido ocurrió",
-      });
-    }
+    res.status(500).json({
+      msg: "Error al actualizar el proyecto",
+      error: error instanceof Error ? error.message : "Un error desconocido ocurrió",
+    });
   }
 };
 
