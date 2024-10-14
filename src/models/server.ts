@@ -65,20 +65,17 @@ export class Server {
     try {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
-
-      await Actor.sync({ alter: true });
-      await User.sync({ alter: true });
-      await Proyecto.sync({ alter: true });
-      await Personaje.sync({ alter: true });
-
+  
+      // En lugar de sync, usa esto solo para verificar la conexión
+      await sequelize.query('SELECT 1');
+  
       this.initializeAssociations();
-
-      console.log("Database synchronized and associations initialized.");
+  
+      console.log("Database connection verified and associations initialized.");
     } catch (error) {
       console.error("Unable to connect to the database:", error);
     }
   }
-
   private initializeAssociations() {
     const models = { Actor, User, Proyecto, Personaje };
     Object.values(models).forEach((model: any) => {
